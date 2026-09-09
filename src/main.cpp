@@ -145,6 +145,20 @@ struct Bullet : public sf::Drawable {
         //      - lifetime <= 0.0f, or
         //      - bullet is off screen (use shape.getPosition() and
         //        WINDOW_WIDTH and WINDOW_HEIGHT)
+
+        // Mark dead if lifetime is expired or bullet leaves screen
+        if( lifetime <= 0.0f ) { // Seems that lifetime is long enough that bullet will always exceed bounds first
+            // std::cout << "Bullet lifetime end" << std::endl;
+            isAlive = false;
+        } else if (shape.getPosition().x < 0 || shape.getPosition().x > WINDOW_WIDTH || shape.getPosition().y < 0 || shape.getPosition().y > WINDOW_HEIGHT) {
+            // std::cout << "Bullet OOB" << std::endl;
+            isAlive = false;
+        } else { // Update position if alive
+            shape.setPosition(shape.getPosition() + velocity);
+            lifetime -= (1.0f / 60.0f);
+            // std::cout << lifetime << std::endl;
+        }
+
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
@@ -247,6 +261,16 @@ public:
         //  - Bullet direction is the same as the spaceship's facing direction.
         //  - Bullet should be shot from the current spaceship position.
 
+        // Check that input is present and cooldown is finished
+        if (inputSummary.shootingDesired && mShootClock.getElapsedTime().asSeconds() >= SHOOT_COOLDOWN) {
+            // ( cos(rotation), sin(rotation) ) is off by 90 degrees
+            sf::Vector2f facing = sf::Vector2f(cos(mSpaceship.getRotation().asRadians() - M_PI/2), sin(mSpaceship.getRotation().asRadians() - M_PI/2));
+            // Create bullet starting from Spaceship position and offsetting in facing direction by spaceship radius
+            mBullets.emplace_back(mSpaceship.getPosition() + sf::Vector2f(SPACESHIP_HITBOX_RADIUS * facing.x, SPACESHIP_HITBOX_RADIUS * facing.y), sf::Vector2f(BULLET_SPEED * facing.x, BULLET_SPEED * facing.y));
+            // Reset cooldown timer
+            mShootClock.restart();
+        }
+
         // --- Update Asteroids ---
         for (auto& asteroid : mAsteroids) {
             asteroid.update();
@@ -335,6 +359,16 @@ private:
         // =====
         // TODO: What should we do with dead bullet objects? Just keep them lying around taking up
         // space in memory?
+
+        // Iterate over mBullets vector and delete dead bullet elements
+        // Delete over iteration technique referenced from https://www.geeksforgeeks.org/cpp/how-to-remove-elements-from-a-vector-while-iterating-in-cpp/
+        for (std::vector<Bullet>::iterator bullet = mBullets.begin(); bullet != mBullets.end();) {
+            if (!bullet->isAlive) {
+                bullet = mBullets.erase(bullet);
+            } else {
+                ++bullet;
+            }
+        }
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
