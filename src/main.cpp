@@ -339,6 +339,13 @@ private:
             // TODO: Use Circle-Circle intersection test (circlesIntersect)
             // to determine if the spaceship's hitbox collides with an asteroid.
             // If so, kill the asteroid and play an explosion sound.
+
+            // Note: Asteroid CircleShape element can be passed, Spaceship CircleShape element is private
+            if (circlesIntersect(asteroid.shape.getPosition(), asteroid.shape.getRadius(), mSpaceship.getPosition(), SPACESHIP_HITBOX_RADIUS)) {
+                asteroid.isAlive = false;
+                mExplosionSound.play();
+                // std::cout << "BOOM" << std::endl;
+            }
         }
     }
 
