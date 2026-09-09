@@ -321,6 +321,11 @@ private:
                     // TODO: Add Explosion Sound Effect
                     // Play explosion sound!
 
+                    // Sound object already created in template. Just play.
+                    mExplosionSound.play();
+                    // std::cout << "BOOM" << std::endl;
+
+
                     break;  // Bullet can only hit one asteroid
                 }
             }
