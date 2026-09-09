@@ -1,2 +1,7 @@
 Answer written questions 1 and 2 here.
 
+1. Briefly discuss how SFML's coordinate system works and how it affects angle calculations. Are there any surprising differences from what you would normally expect?
+    - With (0,0) being in the top-left corner and the y-axis increasing downwards instead of upwards, the orientation of vectors is offset 90 degrees from "upright" coordinate systems, meaning direction has to be corrected by 90 degrees every time an angle is calculated
+
+2. Consider the setup of the game loop. InputSummary summarizes the inputs (events), and then gameState.update looks only at its own state and InputSummary. What is the benefit of this design compared with directly modifying GameState inside processInputs?
+    - Allows the code to remain more readable by separating the code that scans for inputs from the game state. Edits can also be made to input checks without going into the game state code and potentially messing with it.
